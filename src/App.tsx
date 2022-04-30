@@ -1,5 +1,7 @@
 import React from 'react';
 
-const App: React.FC = () => <span>Creating AutoComplete!</span>;
+import { Autocomplete } from './components';
+
+const App: React.FC = () => <Autocomplete />;
 
 export default App;
