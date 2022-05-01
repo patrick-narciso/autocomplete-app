@@ -1,20 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 
 import { Autocomplete } from './components';
-import { getUsers } from './services/users';
+import { getCockTails } from './services/cocktails';
 
 const App: React.FC = () => {
-  const [users, setUsers] = useState<string[]>([]);
 
-  useEffect(() => {
-    const loadUsers = async () => {
-      const users = await getUsers();
-      setUsers(users.map(({ email }) => email));
-    }
-    loadUsers();
-  }, []);
+  const searchCocktails = async (text: string): Promise<string[] | null> => {
+    const response = await getCockTails(text);
+    return response ? response.map(({ strDrink }) => strDrink) : null;
+  };
 
-  return <Autocomplete data={users} placeholder="Search for email user" />
+  return <Autocomplete fetchData={searchCocktails} placeholder="Search for a cocktail by name" />
 };
 
 export default App;
