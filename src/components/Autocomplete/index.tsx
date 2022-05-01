@@ -1,42 +1,53 @@
-import React, { useState } from 'react';
+import React, { MouseEventHandler, useState } from 'react';
 
-import { AutocompleteInput } from './styles';
+import { AutocompleteInput, SuggestionContainer, AutoCompleteContainer } from "./styles";
 
 interface AutocompleteProps {
   fetchData: (text: string) => Promise<string[] | null>,
   placeholder?: string,
   className?: string,
+  type?: string,
+  id: string,
+  name: string,
 }
 
 interface HighlightedProps {
   text: string,
   highlight: string,
+  onClick: MouseEventHandler,
 }
 
-  const Highlighted: React.FC<HighlightedProps> = ({ text, highlight }) => {
-    if (!highlight.trim()) {
-      return <span>{text}</span>;
-    }
-    const regex = new RegExp(`(${highlight})`, "gi");
-    const parts = text.split(regex);
+const Highlighted: React.FC<HighlightedProps> = ({
+  text,
+  highlight,
+  onClick,
+}) => {
+  if (!highlight.trim()) {
+    return <span onClick={onClick}>{text}</span>;
+  }
+  const regex = new RegExp(`(${highlight})`, "gi");
+  const parts = text.split(regex);
 
-    return (
-      <span>
-        {parts.filter(String).map((part, index) => {
-          return regex.test(part) ? (
-            <mark key={`${part}-${index}`}>{part}</mark>
-          ) : (
-            <span key={`${part}-${index}`}>{part}</span>
-          );
-        })}
-      </span>
-    );
-  };
+  return (
+    <span onClick={onClick}>
+      {parts.filter(String).map((part, index) => {
+        return regex.test(part) ? (
+          <strong key={`${part}-${index}`}>{part}</strong>
+        ) : (
+          <span key={`${part}-${index}`}>{part}</span>
+        );
+      })}
+    </span>
+  );
+};
 
 const Autocomplete: React.FC<AutocompleteProps> = ({
   fetchData,
   className,
   placeholder = "",
+  type = "text",
+  id,
+  name,
 }) => {
   const [text, setText] = useState<string>("");
   const [suggestions, setSuggestions] = useState<string[]>([]);
@@ -52,19 +63,27 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
       const regex = new RegExp(`${text}`, "gi");
       return value.match(regex);
     });
-    setSuggestions(matches || [""]);
+    setSuggestions(matches || []);
     setText(text);
   };
 
   const onBlurHandler = () => {
     setTimeout(() => {
       setSuggestions([]);
-    }, 100);
+    }, 500);
+  };
+
+  const onSuggestHandler = (text: string) => {
+    setText(text);
+    setSuggestions([]);
   };
 
   return (
-    <div>
+    <AutoCompleteContainer>
       <AutocompleteInput
+        id={id}
+        name={name}
+        type={type}
         className={className}
         placeholder={placeholder}
         value={text}
@@ -73,13 +92,19 @@ const Autocomplete: React.FC<AutocompleteProps> = ({
         }
         onBlur={onBlurHandler}
       />
-      {suggestions &&
-        suggestions.map((suggestion, index) => (
-          <div key={`${suggestion}-${index}`}>
-            <Highlighted text={suggestion} highlight={text} />
-          </div>
-        ))}
-    </div>
+      {suggestions.length > 0 && (
+        <SuggestionContainer>
+          {suggestions.map((suggestion, index) => (
+            <Highlighted
+              key={`${suggestion}-${index}`}
+              text={suggestion}
+              highlight={text}
+              onClick={() => onSuggestHandler(suggestion)}
+            />
+          ))}
+        </SuggestionContainer>
+      )}
+    </AutoCompleteContainer>
   );
 };
 

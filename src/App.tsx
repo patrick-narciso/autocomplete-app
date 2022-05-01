@@ -2,6 +2,7 @@ import React from 'react';
 
 import { Autocomplete } from './components';
 import { getCockTails } from './services/cocktails';
+import { Container } from './App.styles';
 
 const App: React.FC = () => {
 
@@ -10,7 +11,16 @@ const App: React.FC = () => {
     return response ? response.map(({ strDrink }) => strDrink) : null;
   };
 
-  return <Autocomplete fetchData={searchCocktails} placeholder="Search for a cocktail by name" />
+  return (
+    <Container>
+      <Autocomplete
+        id="autoCocktails"
+        name="autocompleteCocktails"
+        fetchData={searchCocktails}
+        placeholder="Search for a cocktail by name"
+      />
+    </Container>
+  );
 };
 
 export default App;
